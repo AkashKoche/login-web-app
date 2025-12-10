@@ -57,6 +57,9 @@ app.use('/links', require('./routes/links'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 /* Starting the server */
-app.listen(app.get('port'), () => {
-    console.log('Server on port: ' + app.get('port'));
+// Web App - Main Startup File (e.g., src/index.js)
+// ...
+const PORT = process.env.PORT || 4000; // Use 4000 as your primary port
+app.listen(PORT, '0.0.0.0', () => { // CRITICAL: Listen on 0.0.0.0
+    console.log(`Server on port: ${PORT}`);
 });

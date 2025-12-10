@@ -6,17 +6,23 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root_password_secret
-      MYSQL_DATABASE: crud_link
+      MYSQL_DATABASE: crud_links
+      MYSQL_DEFAULT_AUTHENTICATION_PLUGIN: mysql_native_password
     ports:
       - "3306:3306"
     volumes:
+      - ./database/create_database.sql:/docker-entrypoint-initdb.d/init.sql
       - database-data:/var/lib/mysql
-      - ./database/create_database.sql:/docker-entrypoint-initdb.d/create_database.sql
+    command: --skip-host-cache --max_connections=500
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u$$MYSQL_USER", "-p$$MYSQL_PASSWORD"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   link-service:
     build:
       context: ./link-service
-      dockerfile: Dockerfile
     restart: always
     ports:
       - "3001:3001"
@@ -26,24 +32,26 @@ services:
       DB_PASSWORD: root_password_secret
       DB_DATABASE: crud_links
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   web-app:
     build:
       context: .
-      dockerfile: Dockerfile
-      restart: always
-      ports:
-        - "3000:3000"
-      environment:
-        DB_HOST: db
-        DB_USER: root
-        DB_PASSWORD: root_password_secret
-        DB_DATABASE: crud_links
+    restart: always
+    ports:
+      - "4000:4000"
+    command: ["node", "src/index.js"]
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: root_password_secret
+      DB_DATABASE: crud_links
 
-        LINK_SERVICE_URL: http://link-service:3001/api/v1/links
-      depends_on:
-        - link-service
+      LINK_SERVICE_URL: http://link-service:3001/api/v1/links
+    depends_on:
+      link-service:
+        condition: service_started
 
 volumes:
   database-data:

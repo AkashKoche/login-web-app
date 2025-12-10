@@ -1,10 +1,10 @@
 module.exports = {
     database: {
         // Configuration for the database (used for user auth/sessions)
-        host: process.env.DB_HOST || 'localhost',
+        host: process.env.DB_HOST || 'db',
         user: process.env.DB_USER || 'root',
-        password: process.env.DB_PASSWORD || '',
-        database: process.env.DB_DATABASE || 'crud_links'
+        password: process.env.DB_PASSWORD || 'password',
+        database: process.env.DB_DATABASE || 'crud_links',
     },
     // New: Configuration for the Link Microservice API
     linkService: {

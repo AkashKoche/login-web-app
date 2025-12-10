@@ -6,29 +6,42 @@ const databaseConfig = {
     host: process.env.DB_HOST,       // Should be 'db' in Docker
     user: process.env.DB_USER,       // Should be 'root'
     password: process.env.DB_PASSWORD, // Should be 'root_password_secret'
-    database: process.env.DB_DATABASE // Should be 'crud_links'
+    database: process.env.DB_DATABASE, // Should be 'crud_links'
+    port: 3306,
 };
+
+console.log('Link Service DB Config:', databaseConfig.host, databaseConfig.user, 'PASS:', databaseConfig.password);
 
 const pool = mysql.createPool(databaseConfig);
 
-pool.getConnection((err, conn) => {
-    if (err) {
-        if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-            console.error('DATABASE_CONNECTION_WAS_CLOSED');
-        }
-        if (err.code === 'ER_CON_COUNT_ERRORS') {
-            console.error('DATABASE HAS TOO MANY CONNECTIONS');
-        }
-        if (err.code === 'ECONNREFUSED') {
-            console.error('DATABASE CONNECTION WAS REFUSED');
-        }
-        return;
-    }
-
-    if (conn) conn.release();
-    console.log('DB is Connected for Link Service');
-    return;
+pool.on('error', (err) => {
+    console.error('MySQL Pool Error:', err.code, err.message);
+    // You can handle or log critical pool errors here
 });
+
+const handleConnection = () => {
+    pool.getConnection((err, conn) => {
+        if (err) {
+            if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+                console.error('DATABASE_CONNECTION_WAS_CLOSED');
+            } else if (err.code === 'ER_CON_COUNT_ERRORS') {
+                console.error('DATABASE HAS TOO MANY CONNECTIONS');
+            } else if (err.code === 'ECONNREFUSED') {
+                console.log('DB connection refused. Retrying in 5 seconds...');
+                // Retry connection after 5 seconds
+                setTimeout(handleConnection, 5000); 
+                return;
+            }
+            return;
+        }
+
+        if (conn) conn.release();
+        console.log('✅ Link Service DB is Connected');
+        return;
+    });
+};
+
+handleConnection(); // Start the connection attempts
 
 /* Promisify Pool Queries */
 pool.query = promisify(pool.query);
