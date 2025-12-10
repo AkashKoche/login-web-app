@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password_secret
+      MYSQL_DATABASE: crud_link
+    ports:
+      - "3306:3306"
+    volumes:
+      - database-data:/var/lib/mysql
+      - ./database/create_database.sql:/docker-entrypoint-initdb.d/create_database.sql
+
+  link-service:
+    build:
+      context: ./link-service
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3001:3001"
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: root_password_secret
+      DB_DATABASE: crud_links
+    depends_on:
+      - db
+
+  web-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      restart: always
+      ports:
+        - "3000:3000"
+      environment:
+        DB_HOST: db
+        DB_USER: root
+        DB_PASSWORD: root_password_secret
+        DB_DATABASE: crud_links
+
+        LINK_SERVICE_URL: http://link-service:3001/api/v1/links
+      depends_on:
+        - link-service
+
+volumes:
+  database-data:

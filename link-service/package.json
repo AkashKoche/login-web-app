@@ -1,0 +1,15 @@
+{
+  "name": "link-service",
+  "version": "1.0.0",
+  "description": "API for managing links",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.16.4",
+    "mysql": "^2.16.0",
+    "body-parser": "^1.19.0",
+    "util": "^0.12.3"
+  }
+}
