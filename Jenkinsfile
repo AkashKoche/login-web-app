@@ -19,7 +19,7 @@ pipeline {
         DB_PORT                      = '3306'
         LINK_SERVICE_HOST_PORT       = '3000'
         LINK_SERVICE_CONTAINER_PORT  = '3000'
-        WEB_APP_HOST_PORT            = '8080'
+        WEB_APP_HOST_PORT            = '4000'
         WEB_APP_CONTAINER_PORT       = '8080'
     }
 
@@ -144,7 +144,7 @@ pipeline {
         always {
             echo 'Teardown Processing: Cleaning up pipeline resources...'
          
-            sh 'docker compose down -v --remove--orphans'
+            sh 'docker compose down -v --remove-orphans'
         
             sh 'rm -f .env'
         }
