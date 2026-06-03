@@ -57,7 +57,7 @@ pipeline {
             steps {
                 echo 'Building Multi-Container Images using Docker Compose...'
  
-                sh 'docker compose build --no-cache'
+                sh 'docker compose --env-file .env build --no-cache'
             }
         }
 
@@ -85,7 +85,7 @@ pipeline {
                 echo 'Spinning up multi-container environment...'
              
  
-                sh 'docker compose up -d'
+                sh 'docker compose --env-file .env up -d'
                 
                 echo 'Awaiting container convergence...'
                 script {
@@ -144,7 +144,7 @@ pipeline {
         always {
             echo 'Teardown Processing: Cleaning up pipeline resources...'
          
-            sh 'docker compose down -v --remove-orphans'
+            sh 'docker compose --env-file .env down -v --remove-orphans'
         
             sh 'rm -f .env'
         }
@@ -153,7 +153,7 @@ pipeline {
         }
         failure {
             echo 'Pipeline failed. Fetching application crash logs:'
-            sh 'docker compose logs --tail="50"'
+            sh 'docker compose --env-file .env logs --tail="50"'
         }
     }
 }
