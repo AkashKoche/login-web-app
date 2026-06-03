@@ -1,57 +1,62 @@
-version: '3.8'
-
 services:
   db:
-    image: mysql:8.0
+    image: mysql:8.4.9
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root_password_secret
-      MYSQL_DATABASE: crud_links
-      MYSQL_DEFAULT_AUTHENTICATION_PLUGIN: mysql_native_password
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - "3306:3306"
+      - "${DB_PORT}:3306"
     volumes:
       - ./database/create_database.sql:/docker-entrypoint-initdb.d/init.sql
       - database-data:/var/lib/mysql
-    command: --skip-host-cache --max_connections=500
+    command: --max_connections=500
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u$$MYSQL_USER", "-p$$MYSQL_PASSWORD"]
+      test: ["CMD", "mysql", "-uroot", "-p${MYSQL_ROOT_PASSWORD}", "-e", "SELECT 1;"]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 5
+      start_period: 20s 
 
   link-service:
-    build:
-      context: ./link-service
+    build: ./link-service
+    image: my-link-service:latest
     restart: always
+    init: true 
     ports:
-      - "3001:3001"
+      - "${LINK_SERVICE_HOST_PORT}:${LINK_SERVICE_CONTAINER_PORT}"
     environment:
       DB_HOST: db
-      DB_USER: root
-      DB_PASSWORD: root_password_secret
-      DB_DATABASE: crud_links
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_DATABASE: ${MYSQL_DATABASE}
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "apk", "add", "--no-cache", "curl", "&&", "curl", "-f", "http://localhost:${LINK_SERVICE_CONTAINER_PORT}/api/v1/links"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   web-app:
-    build:
-      context: .
+    build: .
+    image: my-web-app:latest
     restart: always
+    init: true 
     ports:
-      - "4000:4000"
-    command: ["node", "src/index.js"]
+      - "${WEB_APP_HOST_PORT}:${WEB_APP_CONTAINER_PORT}"
     environment:
       DB_HOST: db
-      DB_USER: root
-      DB_PASSWORD: root_password_secret
-      DB_DATABASE: crud_links
-
-      LINK_SERVICE_URL: http://link-service:3001/api/v1/links
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_DATABASE: ${MYSQL_DATABASE}
+      LINK_SERVICE_URL: http://link-service:${LINK_SERVICE_CONTAINER_PORT}/api/v1/links
     depends_on:
       link-service:
-        condition: service_started
+        condition: service_healthy 
 
 volumes:
   database-data:

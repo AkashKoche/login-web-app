@@ -1,15 +1,11 @@
 // Link Service's database.js
-const mysql = require('mysql');
+const mysql = require('mysql2');
 const { promisify } = require('util');
 
-const database = {
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_DATABASE
-};
+const { database } = require('./keys');
 
 const pool = mysql.createPool(database);
+
 pool.getConnection((err, conn) => {
     if (err) {
         if (err.code === 'PROTOCOL_CONNECTION_LOST') {

@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "express": "^4.16.4",
-    "mysql": "^2.16.0",
+    "mysql2": "^3.22.4",
     "body-parser": "^1.19.0",
     "util": "^0.12.3"
   }

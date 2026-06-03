@@ -4,17 +4,18 @@ const exphbs = require('express-handlebars');
 const path = require('path');
 const flash = require('connect-flash');
 const session = require('express-session');
-const mysqlstore = require('express-mysql-session');
+const MySQLStore = require('express-mysql-session')(session); // Correct pattern for express-mysql-session
 const passport = require('passport');
 
-const { database } = require('./keys');
+const pool = require('./database'); // Import the mysql2 connection pool directly
 
 /* Initializations */
 const app = express();
 require('./lib/passport');
 
 /* Settings */
-app.set('port', process.env.PORT || 4000);
+const PORT = process.env.PORT || 3000; // Standardized to 3000 for Docker internal network
+app.set('port', PORT);
 app.set('views', path.join(__dirname, 'views'));
 app.engine('.hbs', exphbs({
     defaultLayout: 'main',
@@ -23,15 +24,15 @@ app.engine('.hbs', exphbs({
     extname: '.hbs',
     helpers: require('./lib/handlebars')
 }));
-
 app.set('view engine', '.hbs');
 
-/* Middlewars */
+/* Middlewares */
 app.use(session({
     secret: 'crud_links_session',
     resave: false,
     saveUninitialized: false,
-    store: new mysqlstore(database)
+    // FIX: Hand your working mysql2 pool directly to the session store
+    store: new MySQLStore({}, pool) 
 }));
 app.use(flash());
 app.use(morgan('dev'));
@@ -57,9 +58,6 @@ app.use('/links', require('./routes/links'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 /* Starting the server */
-// Web App - Main Startup File (e.g., src/index.js)
-// ...
-const PORT = process.env.PORT || 4000; // Use 4000 as your primary port
-app.listen(PORT, '0.0.0.0', () => { // CRITICAL: Listen on 0.0.0.0
-    console.log(`Server on port: ${PORT}`);
+app.listen(app.get('port'), '0.0.0.0', () => { 
+    console.log(`🚀 Web Server running successfully on port: ${app.get('port')}`);
 });

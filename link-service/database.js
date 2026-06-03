@@ -1,4 +1,4 @@
-const mysql = require('mysql');
+const mysql = require('mysql2');
 const { promisify } = require('util');
 
 // Configuration is now read from environment variables for Docker
@@ -10,7 +10,7 @@ const databaseConfig = {
     port: 3306,
 };
 
-console.log('Link Service DB Config:', databaseConfig.host, databaseConfig.user, 'PASS:', databaseConfig.password);
+console.log(`Link Service DB Config: Host=${databaseConfig.host}, User=${databaseConfig.user}, Database=${databaseConfig.database}`);
 
 const pool = mysql.createPool(databaseConfig);
 
