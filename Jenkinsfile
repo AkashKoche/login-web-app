@@ -144,7 +144,7 @@ pipeline {
         always {
             echo 'Teardown Processing: Cleaning up pipeline resources...'
          
-            sh 'docker compose down -v --orphans'
+            sh 'docker compose down -v --remove--orphans'
         
             sh 'rm -f .env'
         }
