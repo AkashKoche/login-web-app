@@ -1,6 +1,6 @@
 services:
   jenkins:
-    image: jenkins/jenkins:lts
+    build: .
     container_name: jenkins-local
     user: root
     restart: always
