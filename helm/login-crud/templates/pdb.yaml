@@ -1,0 +1,26 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+
+metadata:
+  name: web-app-pdb
+
+spec:
+  minAvailable: {{ .Values.pdb.minAvailable }}
+
+  selector:
+    matchLabels:
+      app: web-app
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+
+metadata:
+  name: link-service-pdb
+
+spec:
+  minAvailable: {{ .Values.pdb.minAvailabel }}
+
+  selector:
+    matchLabels:
+      app: link-service

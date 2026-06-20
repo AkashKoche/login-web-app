@@ -21,3 +21,22 @@ CREATE TABLE IF NOT EXISTS links (
     PRIMARY KEY (id),
     CONSTRAINT fk_links_users FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+/*User */
+CREATE USER IF NOT EXISTS
+'crud_user'@'%'
+IDENTIFIED BY 'CrudUserPass';
+
+GRANT ALL PRIVILEGES
+ON crud_links.*
+TO 'crud_user'@'%';
+
+FLUSH PRIVILEGES;
+
+/* Sessions Table for Express Session Store */
+CREATE TABLE IF NOT EXISTS sessions (
+    session_id VARCHAR(128) COLLATE utf8mb4_bin NOT NULL,
+    expires INT(11) UNSIGNED NOT NULL,
+    data TEXT COLLATE utf8mb4_bin,
+    PRIMARY KEY (session_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

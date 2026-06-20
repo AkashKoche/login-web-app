@@ -1,0 +1,31 @@
+{{- if .Values.monitoring.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "login-crud.fullname" . }}-web-app
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: web-app
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceaMonitor
+metadata:
+  name: {{ include "login-crud.fullname" . }}-link-service
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: link-service
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+{{- end }}

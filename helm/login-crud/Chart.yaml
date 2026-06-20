@@ -1,0 +1,11 @@
+apiVersion: v2
+
+name: login-crud
+
+description: CRUD Links Application with MySQL, Web App and Link Service
+
+type: application
+
+version: 0.1.0
+
+appVersion: "1.0.0"

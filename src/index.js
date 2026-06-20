@@ -58,6 +58,24 @@ app.use('/links', require('./routes/links'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 /* Starting the server */
+app.get('/health', async (req, res) => {
+  try {
+    await pool.query('SELECT 1');
+
+    res.status(200).json({
+      service: 'web-app',
+      status: 'UP'
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      service: 'web-app',
+      status: 'DOWN',
+      error: err.message
+    });
+  }
+});
+
 app.listen(app.get('port'), '0.0.0.0', () => { 
     console.log(`🚀 Web Server running successfully on port: ${app.get('port')}`);
 });

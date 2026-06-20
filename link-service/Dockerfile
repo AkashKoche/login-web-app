@@ -1,13 +1,18 @@
 FROM node:18-alpine
 
+RUN addgroup -g 10001 -S appgroup && \
+    adduser -u 10001 -S -G appgroup -H -D appuser
+
 WORKDIR /usr/src/app
 
-COPY package*.json ./
+COPY --chown=appuser:appgroup package*.json ./
 
 RUN npm install --only=production
 
-COPY . .
+COPY --chown=appuser:appgroup . .
 
 EXPOSE 3001
+
+USER appuser
 
 CMD ["node", "index.js"]

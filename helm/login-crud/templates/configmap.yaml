@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: login-crud-config
+
+data:
+  NODE_ENV: "{{ .Values.config.NODE_ENV }}"
+
+  DB_HOST: "{{ .Values.config.DB_HOST }}"
+
+  DB_DATABASE: "{{ .Values.config.DB_DATABASE }}"
+
+  LINK_SERVICE_URL: "{{ .Values.config.LINK_SERVICE_URL }}"

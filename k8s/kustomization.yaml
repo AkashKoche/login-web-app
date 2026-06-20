@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: login-crud
+
+resources:
+- namespace.yaml
+- secrets.yaml
+
+- mysql/service.yaml
+- mysql/configmap.yaml
+- mysql/statefulset.yaml
+
+- link-service/service.yaml
+- link-service/deployment.yaml
+
+- web-app/service.yaml
+- web-app/deployment.yaml
+
+- ingress.yaml

@@ -1,0 +1,5 @@
+startupProbe:
+  tcpSocket:
+    port: 3306
+  periodSeconds: 10
+  failureThreshold: 30

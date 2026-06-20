@@ -1,0 +1,100 @@
+namespace: login-crud
+
+mysql:
+  image:
+    repository: mysql
+    tag: "8.4.9"
+
+  database: crud_links
+
+  auth:
+    rootPassword: rootpassword
+    username: crud_user
+    password: crudpassword
+
+  persistence:
+    enabled: true
+    size: 5Gi
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+webApp:
+  replicaCount: 2
+
+  pdb:
+    enabled: true
+    minAvailable: 1
+
+  image:
+    repository: my-web-app
+    tag: latest
+
+  config:
+    NODE_ENV: production
+    DB_HOST: mysql
+    DB_DATABASE: crud_links
+    LINK_SERVICE_URL: http://link-service:3001/api/v1/links
+
+  service:
+    port: 80
+    targetPort: 3000
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+linkService:
+  replicaCount: 2
+
+  pdb:
+    enabled: true
+    minAvailable: 1
+
+  image:
+    repository: my-link-service
+    tag: latest
+
+  service:
+    port: 3001
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+ingress:
+  enabled: true
+
+  host: login.local
+
+hpa:
+  enabled: true
+
+  minReplicas: 2
+
+  maxReplicas: 10
+
+  targetCPUUtilizationPercentage: 70
+
+networkPolicy:
+  enabled: true
+  ingressNamespace: traefik
+
+monitoring:
+  enabled: true

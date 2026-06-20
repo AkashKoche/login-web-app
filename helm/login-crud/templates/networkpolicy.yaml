@@ -1,0 +1,90 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+  name: {{ include "login-crud.fullname" . }}-default-deny
+
+spec:
+  podSelector: {}
+
+  policyTypes:
+  - Ingress
+  - Egress
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "login-crud.fullname" . }}-web-app
+spec:
+  podSelector:
+    matchLabels:
+      app: web-app
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: {{ .Values.networkPolicy.ingressNamespace }}
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: link-service
+  - to:
+    - namespaceSelector: {}
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "login-crud.fullname" . }}-link-service
+spec:
+  podSelector:
+    matchLabels:
+      app: link-service
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: web-app
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: mysql
+  - to:
+    - namespaceSelector: {}
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "login-crud.fullname" . }}-mysql
+spec:
+  podSelector:
+    matchLabels:
+      app: mysql
+  policyTypes:
+  - Ingress
+  - from:
+      - podSelector:
+          matchLabels:
+            app: link-service
+{{- end }}
